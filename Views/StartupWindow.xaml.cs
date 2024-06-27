@@ -25,5 +25,16 @@ namespace AppExp.Views
                 MessageBox.Show("Por favor, insira números válidos para jogadores e bots.");
             }
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            // Verifique se não há mais janelas abertas e se sim, encerre a aplicação.
+            if (Application.Current.Windows.Count == 0)
+            {
+                Application.Current.Shutdown();
+            }
+        }
     }
 }

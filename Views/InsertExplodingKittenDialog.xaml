@@ -1,0 +1,10 @@
+﻿<Window x:Class="AppExp.Views.InsertExplodingKittenDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Insert Exploding Kitten" Height="200" Width="300">
+    <StackPanel Margin="10">
+        <TextBlock Text="Escolha a posição para inserir a carta Exploding Kitten:" Margin="0,0,0,10" />
+        <TextBox x:Name="PositionTextBox" Width="200" Margin="0,0,0,10" />
+        <Button Content="OK" Width="100" HorizontalAlignment="Center" Click="OkButton_Click" />
+    </StackPanel>
+</Window>

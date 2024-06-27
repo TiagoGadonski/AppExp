@@ -3,15 +3,18 @@
     public class Deck
     {
         private Stack<Card> _cards;
+        private List<Card> _discardPile;
 
         public Deck()
         {
             _cards = new Stack<Card>();
+            _discardPile = new List<Card>();
         }
 
         public void InitializeDeck(int numberOfPlayers)
         {
             _cards.Clear();
+            _discardPile.Clear();
 
             // Adicionar cartas ao baralho
             int totalDefuses = 6 - numberOfPlayers; // restam defuses após dar 1 a cada jogador
@@ -22,6 +25,8 @@
             for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "Skip", Type = CardType.Skip });
             for (int i = 0; i < 4; i++) _cards.Push(new Card { Name = "Shuffle", Type = CardType.Shuffle });
             for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "See The Future", Type = CardType.SeeTheFuture });
+            for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "Favor", Type = CardType.Favor });
+            for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "Nope", Type = CardType.Nope });
             for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "TacoCat", Type = CardType.TacoCat });
             for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "HairyPotatoCat", Type = CardType.HairyPotatoCat });
             for (int i = 0; i < 5; i++) _cards.Push(new Card { Name = "RainbowRalphingCat", Type = CardType.RainbowRalphingCat });
@@ -59,6 +64,23 @@
         public void AddCard(Card card)
         {
             _cards.Push(card);
+        }
+
+        public void InsertCardAt(Card card, int position)
+        {
+            var cardsList = _cards.ToList();
+            cardsList.Insert(position, card);
+            _cards = new Stack<Card>(cardsList.Reverse<Card>());
+        }
+
+        public IEnumerable<Card> PeekTopCards(int count)
+        {
+            return _cards.Take(count);
+        }
+
+        public void DiscardCard(Card card)
+        {
+            _discardPile.Add(card);
         }
 
         public int CardsCount => _cards.Count;

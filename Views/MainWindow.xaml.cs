@@ -10,5 +10,16 @@ namespace AppExp.Views
             InitializeComponent();
             DataContext = new GameViewModel(numPlayers, numBots);
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            // Verifique se não há mais janelas abertas e se sim, encerre a aplicação.
+            if (Application.Current.Windows.Count == 0)
+            {
+                Application.Current.Shutdown();
+            }
+        }
     }
 }

@@ -19,15 +19,15 @@
         Defuse,
         Attack,
         Skip,
-        Favor,
         Shuffle,
-        Nope,
         SeeTheFuture,
         TacoCat,
         HairyPotatoCat,
         RainbowRalphingCat,
         BeardCat,
-        Cattermelon
+        Cattermelon,
+        Favor,
+        Nope
     }
 
 }
