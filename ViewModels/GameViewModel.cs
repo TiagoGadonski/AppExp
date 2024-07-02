@@ -15,6 +15,7 @@ namespace AppExp.ViewModels
         private Deck _deck;
         private bool _gameOver;
         private bool _mustDrawExtraCard;
+        private Card _selectedCard;
 
         public GameViewModel() { }
 
@@ -22,10 +23,11 @@ namespace AppExp.ViewModels
         {
             Players = new ObservableCollection<Player>();
             GameLog = new ObservableCollection<string>();
-            StartGameCommand = new RelayCommand(_ => StartGame());
             DrawCardCommand = new RelayCommand(_ => DrawCard(), _ => CanDrawCard());
             RestartGameCommand = new RelayCommand(_ => RestartGame());
-            PlayCardCommand = new RelayCommand(CardAction);
+            PlaySelectedCardCommand = new RelayCommand(_ => PlaySelectedCard(), _ => CanPlaySelectedCard());
+            SelectCardCommand = new RelayCommand(SelectCard);
+
             _deck = new Deck();
 
             InitializeGame(numPlayers, numBots);
@@ -33,10 +35,10 @@ namespace AppExp.ViewModels
             AddToLog("Inicializando o jogo...");
         }
 
-        public ICommand StartGameCommand { get; }
-        public ICommand DrawCardCommand { get; }
-        public ICommand RestartGameCommand { get; }
-        public ICommand PlayCardCommand { get; }
+        public ICommand DrawCardCommand { get; private set; }
+        public ICommand RestartGameCommand { get; private set; }
+        public ICommand PlaySelectedCardCommand { get; private set; }
+        public ICommand SelectCardCommand { get; private set; }
 
         public ObservableCollection<Player> Players
         {
@@ -48,6 +50,11 @@ namespace AppExp.ViewModels
             }
         }
 
+        private void SelectCard(object card)
+        {
+            SelectedCard = card as Card;
+        }
+
         public Player CurrentPlayer
         {
             get => _currentPlayer;
@@ -55,6 +62,8 @@ namespace AppExp.ViewModels
             {
                 _currentPlayer = value;
                 OnPropertyChanged(nameof(CurrentPlayer));
+                OnPropertyChanged(nameof(IsCurrentPlayer));
+                NotifyCommands();
             }
         }
 
@@ -70,30 +79,71 @@ namespace AppExp.ViewModels
             }
         }
 
+        public Card SelectedCard
+        {
+            get => _selectedCard;
+            set
+            {
+                if (_selectedCard != value)
+                {
+                    _selectedCard = value;
+                    OnPropertyChanged(nameof(SelectedCard));
+                    ((RelayCommand)PlaySelectedCardCommand).NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        public bool IsCurrentPlayer => CurrentPlayer != null && !CurrentPlayer.IsBot;
+
+        private void NotifyCommands()
+        {
+            ((RelayCommand)PlaySelectedCardCommand).NotifyCanExecuteChanged();
+            ((RelayCommand)DrawCardCommand).NotifyCanExecuteChanged();
+            CommandManager.InvalidateRequerySuggested(); // Força a reavaliação dos comandos
+        }
+
+
         private void AddToLog(string message)
         {
             GameLog.Add(message);
             OnPropertyChanged(nameof(GameLog));
         }
 
+        private void PlaySelectedCard()
+        {
+            if (SelectedCard != null && CurrentPlayer != null && CurrentPlayer.Hand.Contains(SelectedCard))
+            {
+                // Realiza a ação com a carta selecionada
+                CurrentPlayer.Hand.Remove(SelectedCard);
+                _deck.DiscardCard(SelectedCard);
+                AddToLog($"{CurrentPlayer.Name} jogou a carta {SelectedCard.Name}.");
+                ApplyCardEffect(SelectedCard);
+
+                SelectedCard = null; // Limpa a seleção após jogar
+                OnPropertyChanged(nameof(SelectedCard)); // Notifica a mudança
+
+                NotifyCommands(); // Atualiza os estados dos comandos
+            }
+        }
+
+        private bool CanPlaySelectedCard()
+        {
+            return SelectedCard != null && CurrentPlayer != null && CurrentPlayer.Hand.Contains(SelectedCard) && IsCurrentPlayer;
+        }
+
         private void CardAction(object parameter)
         {
-            if (parameter is Card playedCard)
+            if (parameter is Card playedCard && CurrentPlayer != null && CurrentPlayer.Hand.Contains(playedCard))
             {
-                if (CurrentPlayer.Hand.Contains(playedCard))
-                {
-                    if (IsCatCard(playedCard.Type) && HasMatchingCatCard(playedCard.Type))
-                    {
-                        PlayCatCard(playedCard);
-                    }
-                    else
-                    {
-                        CurrentPlayer.Hand.Remove(playedCard);
-                        _deck.DiscardCard(playedCard);
-                        AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
-                        ApplyCardEffect(playedCard);
-                    }
-                }
+                // Sua lógica para jogar a carta
+                CurrentPlayer.Hand.Remove(playedCard);
+                _deck.DiscardCard(playedCard);
+                AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
+                // Outras ações baseadas no tipo de carta
+                ApplyCardEffect(playedCard);
+                OnPropertyChanged(nameof(CurrentPlayer));
+                // Certifique-se de chamar NotifyCommands para atualizar o estado dos comandos
+                NotifyCommands();
             }
         }
 
@@ -113,27 +163,55 @@ namespace AppExp.ViewModels
 
         private void PlayCatCard(Card playedCard)
         {
-            var matchingCard = CurrentPlayer.Hand.First(c => c.Type == playedCard.Type && c != playedCard);
-            CurrentPlayer.Hand.Remove(playedCard);
-            CurrentPlayer.Hand.Remove(matchingCard);
-            _deck.DiscardCard(playedCard);
-            _deck.DiscardCard(matchingCard);
-            AddToLog($"{CurrentPlayer.Name} jogou duas cartas {playedCard.Name}.");
-
-            // Prompt to select a player to steal a card from
-            var otherPlayers = Players.Where(p => p != CurrentPlayer && p.Hand.Any()).ToList();
-            if (otherPlayers.Any())
+            var matchingCards = CurrentPlayer.Hand.Where(c => c.Type == playedCard.Type).ToList();
+            if (matchingCards.Count == 2)
             {
-                var selectPlayerDialog = new SelectPlayerDialog(new ObservableCollection<Player>(otherPlayers));
-                if (selectPlayerDialog.ShowDialog() == true)
+                var otherPlayers = Players.Where(p => p != CurrentPlayer && p.Hand.Any()).ToList();
+                if (otherPlayers.Any())
                 {
-                    var selectedPlayer = selectPlayerDialog.SelectedPlayer;
-                    var stolenCard = StealRandomCard(selectedPlayer);
-                    AddToLog($"{CurrentPlayer.Name} roubou uma carta {stolenCard.Name} de {selectedPlayer.Name}.");
+                    var selectPlayerDialog = new SelectPlayerDialog(new ObservableCollection<Player>(otherPlayers));
+                    if (selectPlayerDialog.ShowDialog() == true)
+                    {
+                        var selectedPlayer = selectPlayerDialog.SelectedPlayer;
+                        var stolenCard = StealRandomCard(selectedPlayer);
+                        AddToLog($"{CurrentPlayer.Name} roubou uma carta {stolenCard.Name} de {selectedPlayer.Name}.");
+                    }
                 }
             }
+            else if (matchingCards.Count == 3)
+            {
+                var otherPlayers = Players.Where(p => p != CurrentPlayer && p.Hand.Any()).ToList();
+                if (otherPlayers.Any())
+                {
+                    var selectPlayerDialog = new SelectPlayerDialog(new ObservableCollection<Player>(otherPlayers));
+                    if (selectPlayerDialog.ShowDialog() == true)
+                    {
+                        var selectedPlayer = selectPlayerDialog.SelectedPlayer;
+                        // Implement logic to select specific card from selectedPlayer
+                    }
+                }
+            }
+            else if (HasAllDifferentCatCards())
+            {
+                // Implement logic to take a card from the discard pile
+            }
+            CurrentPlayer.Hand.Remove(playedCard);
+            _deck.DiscardCard(playedCard);
+            AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
+        }
 
-            OnPropertyChanged(nameof(CurrentPlayer));
+        private bool HasAllDifferentCatCards()
+        {
+            var catCardTypes = new List<CardType>
+            {
+                CardType.TacoCat,
+                CardType.HairyPotatoCat,
+                CardType.RainbowRalphingCat,
+                CardType.BeardCat,
+                CardType.Cattermelon
+            };
+
+            return catCardTypes.All(type => CurrentPlayer.Hand.Any(c => c.Type == type));
         }
 
         private Card StealRandomCard(Player player)
@@ -216,33 +294,8 @@ namespace AppExp.ViewModels
                 CurrentPlayer.MustDrawCards = 1;
             }
             OnPropertyChanged(nameof(CurrentPlayer));
-        }
-
-        private void StartGame()
-        {
-            _gameOver = false;
-            _deck.InitializeDeck(Players.Count);
-            foreach (var player in Players)
-            {
-                player.Hand.Clear();
-                player.Hand.Add(new Card { Name = "Defuse", Type = CardType.Defuse });
-                for (int i = 0; i < 7; i++)
-                {
-                    player.Hand.Add(_deck.DrawCard());
-                }
-            }
-
-            _deck.AddExplodingKittens(Players.Count - 1);
-            _deck.Shuffle();
-
-            if (Players.Any())
-            {
-                CurrentPlayer = Players[0];
-            }
-
-            StatusMessage = "Jogo iniciado!";
-            AddToLog(StatusMessage);
-            OnPropertyChanged(nameof(Players));
+            ((RelayCommand)PlaySelectedCardCommand).NotifyCanExecuteChanged();
+            NotifyCommands();
         }
 
         private bool CanDrawCard()
@@ -252,7 +305,7 @@ namespace AppExp.ViewModels
 
         private void DrawCard()
         {
-            if (CurrentPlayer != null && !_gameOver)
+            if (CurrentPlayer != null && !_gameOver && CurrentPlayer.MustDrawCards > 0)
             {
                 var drawnCard = _deck.DrawCard();
                 CurrentPlayer.Hand.Add(drawnCard);
@@ -261,56 +314,75 @@ namespace AppExp.ViewModels
 
                 if (drawnCard.Type == CardType.ExplodingKitten)
                 {
-                    if (CurrentPlayer.Hand.Any(c => c.Type == CardType.Defuse))
-                    {
-                        var defuseCard = CurrentPlayer.Hand.First(c => c.Type == CardType.Defuse);
-                        CurrentPlayer.Hand.Remove(defuseCard);
-                        AddToLog($"{CurrentPlayer.Name} desarmou um Exploding Kitten!");
-                        PromptExplodingKittenPlacement();
-                    }
-                    else
-                    {
-                        StatusMessage = $"{CurrentPlayer.Name} explodiu!";
-                        AddToLog(StatusMessage);
-                        Players.Remove(CurrentPlayer);
-                        if (Players.Count == 1)
-                        {
-                            StatusMessage = $"{Players[0].Name} é o vencedor!";
-                            AddToLog(StatusMessage);
-                            _gameOver = true;
-                        }
-                        else
-                        {
-                            NextPlayer();
-                        }
-                    }
+                    HandleExplodingKitten(drawnCard);
                 }
                 else
                 {
-                    if (CurrentPlayer.MustDrawCards == 0)
-                    {
-                        NextPlayer();
-                    }
+                    // Verifica se deve passar a vez após comprar uma carta que não é Exploding Kitten
+                    CheckForTurnPass();
                 }
 
                 OnPropertyChanged(nameof(CurrentPlayer));
+                NotifyCommands(); // Assegura que o estado do comando seja atualizado após cada ação
             }
         }
 
-        private void PromptExplodingKittenPlacement()
+
+
+        private void ExplodePlayer()
+        {
+            StatusMessage = $"{CurrentPlayer.Name} explodiu!";
+            AddToLog(StatusMessage);
+            Players.Remove(CurrentPlayer);
+            if (Players.Count == 1)
+            {
+                StatusMessage = $"{Players[0].Name} é o vencedor!";
+                AddToLog(StatusMessage);
+                _gameOver = true;
+            }
+            NextPlayer();
+        }
+
+        private void CheckForTurnPass()
+        {
+            // Implemente lógica para passar a vez se necessário
+            if (CurrentPlayer.MustDrawCards <= 0)
+            {
+                NextPlayer();
+            }
+        }
+
+        private void HandleExplodingKitten(Card drawnCard)
+        {
+            if (CurrentPlayer.Hand.Any(c => c.Type == CardType.Defuse))
+            {
+                var defuseCard = CurrentPlayer.Hand.First(c => c.Type == CardType.Defuse);
+                CurrentPlayer.Hand.Remove(defuseCard);
+                _deck.DiscardCard(defuseCard); // Descarte a carta Defuse
+                PromptExplodingKittenPlacement(drawnCard); // Pedir para reposicionar o Exploding Kitten
+            }
+            else
+            {
+                ExplodePlayer();
+            }
+        }
+
+        private void PromptExplodingKittenPlacement(Card kittenCard)
         {
             var inputBox = new InputBox("Digite a posição para colocar a carta Exploding Kitten (1 a " + (_deck.CardsCount + 1) + "):");
             if (inputBox.ShowDialog() == true)
             {
                 int position = int.Parse(inputBox.ResponseText) - 1;
-                _deck.InsertCardAt(new Card { Name = "Exploding Kitten", Type = CardType.ExplodingKitten }, position);
+                _deck.InsertCardAt(kittenCard, position); // Inserir a carta no deck, não no discard
                 AddToLog($"{CurrentPlayer.Name} colocou a carta Exploding Kitten de volta no baralho na posição {position + 1}.");
-                if (CurrentPlayer.MustDrawCards == 0)
-                {
-                    NextPlayer();
-                }
+                NextPlayer();
+            }
+            else
+            {
+                NextPlayer(); // Se o diálogo for cancelado, passe a vez
             }
         }
+
 
         private void RestartGame()
         {
@@ -355,13 +427,19 @@ namespace AppExp.ViewModels
             StatusMessage = "Jogo iniciado!";
             AddToLog(StatusMessage);
             OnPropertyChanged(nameof(CurrentPlayer));
+            NotifyCommands();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (propertyName == nameof(SelectedCard) || propertyName == nameof(CurrentPlayer))
+            {
+                OnPropertyChanged(nameof(CanPlaySelectedCard));  // Assegura que CanPlaySelectedCard seja reavaliada
+            }
         }
     }
 }
+

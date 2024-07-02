@@ -1,14 +1,19 @@
 ﻿using System.Windows.Input;
-
 public class RelayCommand : ICommand
 {
     private readonly Action<object> _execute;
-    private readonly Predicate<object> _canExecute;
+    private readonly Func<object, bool> _canExecute;
 
-    public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+    public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
     {
         _execute = execute ?? throw new ArgumentNullException(nameof(execute));
         _canExecute = canExecute;
+    }
+
+    public event EventHandler CanExecuteChanged
+    {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
     }
 
     public bool CanExecute(object parameter)
@@ -21,9 +26,8 @@ public class RelayCommand : ICommand
         _execute(parameter);
     }
 
-    public event EventHandler CanExecuteChanged
+    public void NotifyCanExecuteChanged()
     {
-        add { CommandManager.RequerySuggested += value; }
-        remove { CommandManager.RequerySuggested -= value; }
+        CommandManager.InvalidateRequerySuggested();
     }
 }

@@ -1,8 +1,9 @@
 ﻿<Application x:Class="AppExp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:AppExp.Converters"
              StartupUri="Views/StartupWindow.xaml">
     <Application.Resources>
-
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Application.Resources>
 </Application>

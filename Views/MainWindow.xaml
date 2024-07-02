@@ -3,54 +3,82 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:AppExp.Views"
         xmlns:vm="clr-namespace:AppExp.ViewModels"
+        xmlns:converters="clr-namespace:AppExp.Converters"
         Title="Exploding Kittens" Height="600" Width="1000">
     <Window.DataContext>
         <vm:GameViewModel />
     </Window.DataContext>
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:CardEqualityConverter x:Key="CardEqualityConverter"/>
+        <Style x:Key="ToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="DarkBlue"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="{Binding StatusMessage}" FontSize="16" FontWeight="Bold" Margin="10" Grid.Row="0" />
 
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding Players}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="Black" BorderThickness="1" Margin="5" Padding="5">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold"/>
-                                <ItemsControl ItemsSource="{Binding Hand}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Vertical" Margin="5">
-                                                <TextBlock Text="{Binding Name}" FontSize="14"/>
-                                                <Button Content="Play" Command="{Binding DataContext.PlayCardCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Margin="5"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <StackPanel Orientation="Horizontal">
+                <ItemsControl ItemsSource="{Binding Players}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="Black" BorderThickness="1" Margin="5" Padding="5">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold"/>
+                                    <ItemsControl ItemsSource="{Binding Hand}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Vertical" Margin="5">
+                                                    <TextBlock Text="{Binding Name}" FontSize="14"/>
+                                                    <ToggleButton Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+              Command="{Binding DataContext.SelectCardCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+              CommandParameter="{Binding}"/>
+
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
 
-        <ListBox ItemsSource="{Binding GameLog}" Grid.Row="2" Margin="5" Height="100"/>
+        <ListBox ItemsSource="{Binding GameLog}" Grid.Row="2" Margin="10"/>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="5">
-            <Button Content="Draw Card" Command="{Binding DrawCardCommand}" Margin="5" />
-            <Button Content="Restart Game" Command="{Binding RestartGameCommand}" Margin="5" />
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10">
+            <Button Content="Draw Card" Command="{Binding DrawCardCommand}" Margin="10" />
+            <Button Content="Jogar"
+        Command="{Binding PlaySelectedCardCommand}"
+        CommandParameter="{Binding SelectedCard}"
+        IsEnabled="{Binding CanPlaySelectedCard}"/>
+
+
+
+            <Button Content="Restart Game" Command="{Binding RestartGameCommand}" Margin="10" />
         </StackPanel>
     </Grid>
 </Window>
