@@ -164,41 +164,46 @@ namespace AppExp.ViewModels
         private void PlayCatCard(Card playedCard)
         {
             var matchingCards = CurrentPlayer.Hand.Where(c => c.Type == playedCard.Type).ToList();
-            if (matchingCards.Count == 2)
+            var otherPlayers = Players.Where(p => p != CurrentPlayer && p.Hand.Any()).ToList();
+
+            if (matchingCards.Count >= 2 && matchingCards.Count <= 3 && otherPlayers.Any())
             {
-                var otherPlayers = Players.Where(p => p != CurrentPlayer && p.Hand.Any()).ToList();
-                if (otherPlayers.Any())
+                var selectPlayerDialog = new SelectPlayerDialog(new ObservableCollection<Player>(otherPlayers));
+                if (selectPlayerDialog.ShowDialog() == true)
                 {
-                    var selectPlayerDialog = new SelectPlayerDialog(new ObservableCollection<Player>(otherPlayers));
-                    if (selectPlayerDialog.ShowDialog() == true)
+                    var selectedPlayer = selectPlayerDialog.SelectedPlayer;
+                    if (matchingCards.Count == 2)
                     {
-                        var selectedPlayer = selectPlayerDialog.SelectedPlayer;
                         var stolenCard = StealRandomCard(selectedPlayer);
-                        AddToLog($"{CurrentPlayer.Name} roubou uma carta {stolenCard.Name} de {selectedPlayer.Name}.");
+                        AddToLog($"{CurrentPlayer.Name} roubou uma carta aleatória {stolenCard.Name} de {selectedPlayer.Name}.");
                     }
-                }
-            }
-            else if (matchingCards.Count == 3)
-            {
-                var otherPlayers = Players.Where(p => p != CurrentPlayer && p.Hand.Any()).ToList();
-                if (otherPlayers.Any())
-                {
-                    var selectPlayerDialog = new SelectPlayerDialog(new ObservableCollection<Player>(otherPlayers));
-                    if (selectPlayerDialog.ShowDialog() == true)
+                    else if (matchingCards.Count == 3)
                     {
-                        var selectedPlayer = selectPlayerDialog.SelectedPlayer;
-                        // Implement logic to select specific card from selectedPlayer
+                        // Logic to select a specific card goes here
+                        // Placeholder: Steal specific card (to be implemented)
+                        AddToLog($"{CurrentPlayer.Name} escolheu uma carta específica de {selectedPlayer.Name}.");
                     }
                 }
             }
-            else if (HasAllDifferentCatCards())
+            else if (matchingCards.Count == 5 && HasAllDifferentCatCards())
             {
-                // Implement logic to take a card from the discard pile
+                // Logic to take a card from the discard pile
+                AddToLog($"{CurrentPlayer.Name} escolheu uma carta do monte de descarte.");
             }
-            CurrentPlayer.Hand.Remove(playedCard);
-            _deck.DiscardCard(playedCard);
-            AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
+            else
+            {
+                MessageBox.Show("Combinação de cartas inválida. Verifique as regras do jogo.");
+            }
+
+            if (matchingCards.Count == 2 || (matchingCards.Count == 3 && otherPlayers.Any()) || (matchingCards.Count == 5 && HasAllDifferentCatCards()))
+            {
+                CurrentPlayer.Hand.Remove(playedCard);
+                _deck.DiscardCard(playedCard);
+                AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
+            }
         }
+
+
 
         private bool HasAllDifferentCatCards()
         {
