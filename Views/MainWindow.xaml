@@ -12,12 +12,12 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:CardEqualityConverter x:Key="CardEqualityConverter"/>
         <Style x:Key="ToggleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Background" Value="#ff00"/>
             <Setter Property="Foreground" Value="Black"/>
             <Style.Triggers>
                 <Trigger Property="IsChecked" Value="True">
                     <Setter Property="Background" Value="DarkBlue"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Foreground" Value="#000"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -43,7 +43,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border BorderBrush="Black" BorderThickness="1" Margin="5" Padding="5">
+                            <Border BorderBrush="#a1a1a1" BorderThickness="1" Margin="5" Padding="5">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold"/>
                                     <ItemsControl ItemsSource="{Binding Hand}">
@@ -72,9 +72,9 @@
         <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10">
             <Button Content="Draw Card" Command="{Binding DrawCardCommand}" Margin="10" />
             <Button Content="Jogar"
-        Command="{Binding PlaySelectedCardCommand}"
-        CommandParameter="{Binding SelectedCard}"
-        IsEnabled="{Binding CanPlaySelectedCard}"/>
+    Command="{Binding PlaySelectedCardCommand}"
+    CommandParameter="{Binding SelectedCard}"
+    IsEnabled="{Binding CanPlaySelectedCard, PresentationTraceSources.TraceLevel=High}"/>
 
 
 

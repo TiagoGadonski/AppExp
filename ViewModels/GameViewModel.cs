@@ -2,6 +2,7 @@
 using AppExp.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
@@ -25,7 +26,7 @@ namespace AppExp.ViewModels
             GameLog = new ObservableCollection<string>();
             DrawCardCommand = new RelayCommand(_ => DrawCard(), _ => CanDrawCard());
             RestartGameCommand = new RelayCommand(_ => RestartGame());
-            PlaySelectedCardCommand = new RelayCommand(_ => PlaySelectedCard(), _ => CanPlaySelectedCard());
+            PlaySelectedCardCommand = new RelayCommand(_ => PlaySelectedCard(), _ => CanPlaySelectedCard);
             SelectCardCommand = new RelayCommand(SelectCard);
 
             _deck = new Deck();
@@ -53,6 +54,11 @@ namespace AppExp.ViewModels
         private void SelectCard(object card)
         {
             SelectedCard = card as Card;
+            if (IsCatCard(SelectedCard.Type) && HasMatchingCatCard(SelectedCard.Type))
+            {
+                // Se a carta selecionada é uma carta de gato e tem pares suficientes, ativar a lógica para jogar.
+                PlayCatCard(SelectedCard);
+            }
         }
 
         public Player CurrentPlayer
@@ -87,7 +93,8 @@ namespace AppExp.ViewModels
                 if (_selectedCard != value)
                 {
                     _selectedCard = value;
-                    OnPropertyChanged(nameof(SelectedCard));
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CanPlaySelectedCard));
                     ((RelayCommand)PlaySelectedCardCommand).NotifyCanExecuteChanged();
                 }
             }
@@ -99,7 +106,7 @@ namespace AppExp.ViewModels
         {
             ((RelayCommand)PlaySelectedCardCommand).NotifyCanExecuteChanged();
             ((RelayCommand)DrawCardCommand).NotifyCanExecuteChanged();
-            CommandManager.InvalidateRequerySuggested(); // Força a reavaliação dos comandos
+            CommandManager.InvalidateRequerySuggested();
         }
 
 
@@ -113,22 +120,34 @@ namespace AppExp.ViewModels
         {
             if (SelectedCard != null && CurrentPlayer != null && CurrentPlayer.Hand.Contains(SelectedCard))
             {
-                // Realiza a ação com a carta selecionada
-                CurrentPlayer.Hand.Remove(SelectedCard);
-                _deck.DiscardCard(SelectedCard);
-                AddToLog($"{CurrentPlayer.Name} jogou a carta {SelectedCard.Name}.");
-                ApplyCardEffect(SelectedCard);
+                if (IsCatCard(SelectedCard.Type))
+                {
+                    PlayCatCard(SelectedCard);
+                }
+                else
+                {
+
+                    CurrentPlayer.Hand.Remove(SelectedCard);
+                    _deck.DiscardCard(SelectedCard);
+                    AddToLog($"{CurrentPlayer.Name} jogou a carta {SelectedCard.Name}.");
+                    ApplyCardEffect(SelectedCard);
+                }
 
                 SelectedCard = null; // Limpa a seleção após jogar
                 OnPropertyChanged(nameof(SelectedCard)); // Notifica a mudança
-
                 NotifyCommands(); // Atualiza os estados dos comandos
             }
         }
 
-        private bool CanPlaySelectedCard()
+        public bool CanPlaySelectedCard
         {
-            return SelectedCard != null && CurrentPlayer != null && CurrentPlayer.Hand.Contains(SelectedCard) && IsCurrentPlayer;
+            get { return CanPlaySelectedCardEvaluate(); }
+        }
+
+        private bool CanPlaySelectedCardEvaluate()
+        {
+            return SelectedCard != null && CurrentPlayer != null && CurrentPlayer.Hand.Contains(SelectedCard) && IsCurrentPlayer &&
+           (!IsCatCard(SelectedCard.Type) || HasMatchingCatCard(SelectedCard.Type));
         }
 
         private void CardAction(object parameter)
@@ -437,7 +456,7 @@ namespace AppExp.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             if (propertyName == nameof(SelectedCard) || propertyName == nameof(CurrentPlayer))
