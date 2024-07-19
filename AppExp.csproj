@@ -9,7 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\Images\" />
+    <None Remove="Resources\Images\bg-selectplayer.webp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\bg-selectplayer.webp" />
   </ItemGroup>
 
   <ItemGroup>

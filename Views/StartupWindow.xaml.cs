@@ -36,5 +36,15 @@ namespace AppExp.Views
                 Application.Current.Shutdown();
             }
         }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = e.Uri.ToString(),
+                UseShellExecute = true
+            });
+            e.Handled = true;
+        }
     }
 }

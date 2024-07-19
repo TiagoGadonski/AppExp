@@ -21,13 +21,16 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Showcard Gothic Regular"/>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100"/>
+            <!-- Fixed height for logs -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -54,7 +57,6 @@
                                                     <ToggleButton Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
               Command="{Binding DataContext.SelectCardCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
               CommandParameter="{Binding}"/>
-
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -67,18 +69,16 @@
             </StackPanel>
         </ScrollViewer>
 
-        <ListBox ItemsSource="{Binding GameLog}" Grid.Row="2" Margin="10"/>
+        <!-- ListBox for game logs with fixed size and scrolling -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ListBox ItemsSource="{Binding GameLog}" Margin="10"/>
+        </ScrollViewer>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10">
-            <Button Content="Draw Card" Command="{Binding DrawCardCommand}" Margin="10" />
-            <Button Content="Jogar"
-    Command="{Binding PlaySelectedCardCommand}"
-    CommandParameter="{Binding SelectedCard}"
-    IsEnabled="{Binding CanPlaySelectedCard, PresentationTraceSources.TraceLevel=High}"/>
-
-
-
-            <Button Content="Restart Game" Command="{Binding RestartGameCommand}" Margin="10" />
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10" HorizontalAlignment="Center">
+            <Button Content="Draw Card" Command="{Binding DrawCardCommand}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
+            <Button Content="Jogar" Command="{Binding PlaySelectedCardCommand}" CommandParameter="{Binding SelectedCard}"
+            IsEnabled="{Binding CanPlaySelectedCard, PresentationTraceSources.TraceLevel=High}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
+            <Button Content="Restart Game" Command="{Binding RestartGameCommand}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
         </StackPanel>
     </Grid>
 </Window>
