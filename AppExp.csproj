@@ -10,10 +10,12 @@
 
   <ItemGroup>
     <None Remove="Resources\Images\bg-selectplayer.webp" />
+    <None Remove="Resources\Images\logo.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\Images\bg-selectplayer.webp" />
+    <Resource Include="Resources\Images\logo.png" />
   </ItemGroup>
 
   <ItemGroup>

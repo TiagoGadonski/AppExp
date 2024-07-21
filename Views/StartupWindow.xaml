@@ -2,9 +2,19 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="StartupWindow" Height="400" Width="400">
-    <Grid Background="#670f22">
+    <Grid>
+        <Grid.Background>
+            <RadialGradientBrush>
+                <GradientStop Color="#FF9C212F"/>
+                <GradientStop Color="#FF830917" Offset="1"/>
+            </RadialGradientBrush>
+        </Grid.Background>
         <StackPanel Margin="10" VerticalAlignment="Center">
-            <Image Source="path_to_logo.jpg" Height="50" Margin="5"/>
+            <Image Source="/Resources/Images/logo.png" Height="100" Margin="5">
+                <Image.Effect>
+                    <DropShadowEffect/>
+                </Image.Effect>
+            </Image>
             <TextBlock Text="Número de Jogadores:" Margin="5" FontFamily="Showcard Gothic Regular" FontSize="12" Foreground="#fff"/>
             <TextBox x:Name="NumPlayersTextBox" Margin="5"/>
             <TextBlock Text="Número de Bots:" Margin="5" FontFamily="Showcard Gothic Regular" FontSize="12" Foreground="#fff"/>
