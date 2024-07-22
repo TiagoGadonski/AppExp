@@ -69,16 +69,15 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- ListBox for game logs with fixed size and scrolling -->
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
             <ListBox ItemsSource="{Binding GameLog}" Margin="10"/>
         </ScrollViewer>
 
         <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10" HorizontalAlignment="Center">
-            <Button Content="Draw Card" Command="{Binding DrawCardCommand}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
+            <Button Content="Comprar Carta" Command="{Binding DrawCardCommand}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
             <Button Content="Jogar" Command="{Binding PlaySelectedCardCommand}" CommandParameter="{Binding SelectedCard}"
             IsEnabled="{Binding CanPlaySelectedCard, PresentationTraceSources.TraceLevel=High}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
-            <Button Content="Restart Game" Command="{Binding RestartGameCommand}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
+            <Button Content="Reiniciar" Command="{Binding RestartGameCommand}" Margin="10" FontFamily="Showcard Gothic Regular" FontSize="12"/>
         </StackPanel>
     </Grid>
 </Window>

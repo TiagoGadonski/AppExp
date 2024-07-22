@@ -20,12 +20,19 @@
             <TextBlock Text="Número de Bots:" Margin="5" FontFamily="Showcard Gothic Regular" FontSize="12" Foreground="#fff"/>
             <TextBox x:Name="NumBotsTextBox" Margin="5"/>
             <Button Content="Iniciar Jogo" Click="StartGameButton_Click" Margin="5" FontFamily="Showcard Gothic Regular" FontSize="24"/>
-            <TextBlock Margin="5" HorizontalAlignment="Center" Text="Developed by Tiago Gadonski" FontSize="10" FontStyle="Italic" Foreground="#fff"/>
-            <TextBlock Margin="5" HorizontalAlignment="Center" TextDecorations="Underline" Foreground="Blue">
-                <Hyperlink NavigateUri="https://www.example.com/rules">
-                    <TextBlock Text="Original Game Rules" FontFamily="Segoe UI" FontSize="12"/>
+            <TextBlock Margin="5" HorizontalAlignment="Center" Foreground="#FFAB4817" Background="Black" Padding="15,5,15,5">
+                <Hyperlink NavigateUri="https://ek.explodingkittens.com/downloads/rules/translations/Exploding-Kittens_Rules_PT.pdf" FontFamily="Showcard Gothic Regular" FontWeight="Bold" TextDecorations="None">
+                    <TextBlock Text="Regras do Jogo" FontSize="12" >
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#FFC77328"/>
+                                <GradientStop Color="#FFAD2317" Offset="1"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                    </TextBlock>
                 </Hyperlink>
             </TextBlock>
+            <TextBlock Margin="5" HorizontalAlignment="Center" Text="Developed by Tiago Gadonski" FontSize="10" FontStyle="Italic" Foreground="#fff"/>
         </StackPanel>
     </Grid>
 </Window>

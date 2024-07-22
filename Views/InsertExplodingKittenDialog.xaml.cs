@@ -9,7 +9,7 @@ namespace AppExp.Views
         public InsertExplodingKittenDialog(int maxPosition)
         {
             InitializeComponent();
-            PositionTextBox.Text = "0"; // Default position
+            PositionTextBox.Text = "0";
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)

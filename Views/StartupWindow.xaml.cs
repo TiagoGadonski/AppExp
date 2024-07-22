@@ -11,10 +11,14 @@ namespace AppExp.Views
 
         private void StartGameButton_Click(object sender, RoutedEventArgs e)
         {
-            // Pega o número de jogadores e o número de bots do UI (isso precisa ser implementado no XAML)
             if (int.TryParse(NumPlayersTextBox.Text, out int numPlayers) && int.TryParse(NumBotsTextBox.Text, out int numBots))
             {
-                // Inicia o jogo com os jogadores e bots especificados
+                if ((numPlayers + numBots > 6)|| (numPlayers + numBots <= 1))
+                {
+                    MessageBox.Show("O número total de jogadores e bots devem ser entre 2 e 6.");
+                    return;
+                }
+
                 MainWindow mainWindow = new MainWindow(numPlayers, numBots);
                 mainWindow.Show();
 
@@ -30,7 +34,6 @@ namespace AppExp.Views
         {
             base.OnClosed(e);
 
-            // Verifique se não há mais janelas abertas e se sim, encerre a aplicação.
             if (Application.Current.Windows.Count == 0)
             {
                 Application.Current.Shutdown();

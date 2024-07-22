@@ -15,7 +15,6 @@ namespace AppExp.Views
         {
             base.OnClosed(e);
 
-            // Verifique se não há mais janelas abertas e se sim, encerre a aplicação.
             if (Application.Current.Windows.Count == 0)
             {
                 Application.Current.Shutdown();

@@ -4,18 +4,17 @@ namespace AppExp.Models
 {
     public class Card : INotifyPropertyChanged
     {
-        private bool _isSelected;  // Campo privado para armazenar o estado de seleção
+        private bool _isSelected; 
 
         public string Name { get; set; }
         public CardType Type { get; set; }
 
-        // Propriedade pública IsSelected que notifica as mudanças
         public bool IsSelected
         {
             get => _isSelected;
             set
             {
-                if (_isSelected != value)  // Somente atualiza e notifica se o valor mudou
+                if (_isSelected != value) 
                 {
                     _isSelected = value;
                     OnPropertyChanged(nameof(IsSelected));

@@ -56,7 +56,6 @@ namespace AppExp.ViewModels
             SelectedCard = card as Card;
             if (IsCatCard(SelectedCard.Type) && HasMatchingCatCard(SelectedCard.Type))
             {
-                // Se a carta selecionada é uma carta de gato e tem pares suficientes, ativar a lógica para jogar.
                 PlayCatCard(SelectedCard);
             }
         }
@@ -133,9 +132,9 @@ namespace AppExp.ViewModels
                     ApplyCardEffect(SelectedCard);
                 }
 
-                SelectedCard = null; // Limpa a seleção após jogar
-                OnPropertyChanged(nameof(SelectedCard)); // Notifica a mudança
-                NotifyCommands(); // Atualiza os estados dos comandos
+                SelectedCard = null; 
+                OnPropertyChanged(nameof(SelectedCard)); 
+                NotifyCommands(); 
             }
         }
 
@@ -154,14 +153,11 @@ namespace AppExp.ViewModels
         {
             if (parameter is Card playedCard && CurrentPlayer != null && CurrentPlayer.Hand.Contains(playedCard))
             {
-                // Sua lógica para jogar a carta
                 CurrentPlayer.Hand.Remove(playedCard);
                 _deck.DiscardCard(playedCard);
                 AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
-                // Outras ações baseadas no tipo de carta
                 ApplyCardEffect(playedCard);
                 OnPropertyChanged(nameof(CurrentPlayer));
-                // Certifique-se de chamar NotifyCommands para atualizar o estado dos comandos
                 NotifyCommands();
             }
         }
@@ -206,7 +202,6 @@ namespace AppExp.ViewModels
             }
             else if (matchingCards.Count == 5 && HasAllDifferentCatCards())
             {
-                // Logic to take a card from the discard pile
                 AddToLog($"{CurrentPlayer.Name} escolheu uma carta do monte de descarte.");
             }
             else
@@ -221,8 +216,6 @@ namespace AppExp.ViewModels
                 AddToLog($"{CurrentPlayer.Name} jogou a carta {playedCard.Name}.");
             }
         }
-
-
 
         private bool HasAllDifferentCatCards()
         {
@@ -276,7 +269,6 @@ namespace AppExp.ViewModels
                     AddToLog($"{CurrentPlayer.Name} usou a carta Nope!");
                     break;
                 default:
-                    // Other card types logic
                     break;
             }
             OnPropertyChanged(nameof(StatusMessage));
@@ -342,12 +334,11 @@ namespace AppExp.ViewModels
                 }
                 else
                 {
-                    // Verifica se deve passar a vez após comprar uma carta que não é Exploding Kitten
                     CheckForTurnPass();
                 }
 
                 OnPropertyChanged(nameof(CurrentPlayer));
-                NotifyCommands(); // Assegura que o estado do comando seja atualizado após cada ação
+                NotifyCommands(); 
             }
         }
 
@@ -369,7 +360,6 @@ namespace AppExp.ViewModels
 
         private void CheckForTurnPass()
         {
-            // Implemente lógica para passar a vez se necessário
             if (CurrentPlayer.MustDrawCards <= 0)
             {
                 NextPlayer();
@@ -382,8 +372,11 @@ namespace AppExp.ViewModels
             {
                 var defuseCard = CurrentPlayer.Hand.First(c => c.Type == CardType.Defuse);
                 CurrentPlayer.Hand.Remove(defuseCard);
-                _deck.DiscardCard(defuseCard); // Descarte a carta Defuse
-                PromptExplodingKittenPlacement(drawnCard); // Pedir para reposicionar o Exploding Kitten
+                _deck.DiscardCard(defuseCard); 
+
+                CurrentPlayer.Hand.Remove(drawnCard);
+
+                PromptExplodingKittenPlacement(drawnCard); 
             }
             else
             {
@@ -397,13 +390,13 @@ namespace AppExp.ViewModels
             if (inputBox.ShowDialog() == true)
             {
                 int position = int.Parse(inputBox.ResponseText) - 1;
-                _deck.InsertCardAt(kittenCard, position); // Inserir a carta no deck, não no discard
+                _deck.InsertCardAt(kittenCard, position);
                 AddToLog($"{CurrentPlayer.Name} colocou a carta Exploding Kitten de volta no baralho na posição {position + 1}.");
                 NextPlayer();
             }
             else
             {
-                NextPlayer(); // Se o diálogo for cancelado, passe a vez
+                NextPlayer(); 
             }
         }
 
@@ -461,7 +454,7 @@ namespace AppExp.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             if (propertyName == nameof(SelectedCard) || propertyName == nameof(CurrentPlayer))
             {
-                OnPropertyChanged(nameof(CanPlaySelectedCard));  // Assegura que CanPlaySelectedCard seja reavaliada
+                OnPropertyChanged(nameof(CanPlaySelectedCard)); 
             }
         }
     }

@@ -6,15 +6,15 @@ namespace AppExp.Models
     {
         public string Name { get; set; }
         public bool IsBot { get; set; }
-        public int BotLevel { get; set; } // 0 = Humano, 1 = Fácil, 2 = Médio, 3 = Difícil
+        public int BotLevel { get; set; } 
         public ObservableCollection<Card> Hand { get; set; }
         public bool IsMyTurn { get; set; }
-        public int MustDrawCards { get; set; }  // Quantidade de cartas que o jogador deve pegar
+        public int MustDrawCards { get; set; }  
 
         public Player()
         {
             Hand = new ObservableCollection<Card>();
-            MustDrawCards = 1;  // Por padrão, cada jogador pega uma carta por turno
+            MustDrawCards = 1;
         }
     }
 }
